@@ -188,7 +188,7 @@ const SnowMountain = ({ position, scale, isMobile }: { position: [number, number
     <group ref={meshRef} position={position}>
       {/* Mountain base */}
       <mesh>
-        <coneGeometry args={[2, 5, 8]} />
+        <coneGeometry args={[2, 4, 8]} />
         <meshPhongMaterial 
           color="#A0A0A0"
           shininess={10}
@@ -331,6 +331,7 @@ const RealisticRiver = () => {
           normalScale={new THREE.Vector2(0.5, 0.5)}
         />
       </mesh>
+      
       {/* River bed details */}
       <mesh position={[0, -10, -4]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[35, 4]} />
@@ -340,7 +341,6 @@ const RealisticRiver = () => {
           opacity={0.3}
         />
       </mesh>
-     
       
       {/* Water ripples */}
       <mesh position={[-8, -8.4, -3]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -423,20 +423,71 @@ const EnhancedFireflies = ({ isMobile }: { isMobile?: boolean }) => {
 
 const MagicalBackground = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const updateDimensions = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setDimensions({ width, height });
+      setIsMobile(width < 768);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // Initial setup
+    updateDimensions();
+    
+    // Add resize listener
+    window.addEventListener('resize', updateDimensions);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  // More precise camera positioning based on actual viewport
+  const getCameraConfig = () => {
+    const aspect = dimensions.width / dimensions.height;
+    
+    if (isMobile) {
+      return {
+        position: [0, 1, 8] as [number, number, number],
+        fov: 75,
+        aspect: aspect || 1
+      };
+    } else {
+      return {
+        position: [0, 2, 12] as [number, number, number],
+        fov: 60,
+        aspect: aspect || 1
+      };
+    }
+  };
+
+  // Don't render until we have dimensions
+  if (dimensions.width === 0) {
+    return <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 to-green-50" />;
+  }
+
+  const cameraConfig = getCameraConfig();
 
   return (
     <div className="fixed inset-0 -z-10">
-      <Canvas camera={{ position: [0, 2, 12] }}>
+      <Canvas 
+        camera={{ 
+          position: cameraConfig.position,
+          fov: cameraConfig.fov,
+          aspect: cameraConfig.aspect,
+          near: 0.1,
+          far: 1000
+        }}
+        dpr={[1, Math.min(window.devicePixelRatio, 2)]} // Limit DPR for consistency
+        performance={{ min: 0.5 }}
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
+        style={{ background: 'transparent' }}
+      >
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={0.4} color="#FFF8DC" />
         <pointLight position={[-10, -10, -5]} intensity={0.2} color="#87CEEB" />
