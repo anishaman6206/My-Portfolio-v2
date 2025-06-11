@@ -1,0 +1,220 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nature-inspired Disney theme design system */
+
+@layer base {
+  :root {
+    --background: 248 250 252;
+    --foreground: 15 23 42;
+
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
+
+    --primary: 34 125 34;
+    --primary-foreground: 248 250 252;
+
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
+
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+
+    --accent: 166 134 88;
+    --accent-foreground: 248 250 252;
+
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 34 125 34;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
+
+    --primary: 91 181 91;
+    --primary-foreground: 15 23 42;
+
+    --secondary: 30 41 59;
+    --secondary-foreground: 248 250 252;
+
+    --muted: 30 41 59;
+    --muted-foreground: 148 163 184;
+
+    --accent: 186 156 118;
+    --accent-foreground: 15 23 42;
+
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+
+    --border: 71 85 105;
+    --input: 71 85 105;
+    --ring: 91 181 91;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-poppins;
+    background: radial-gradient(ellipse at top, #f0f9f0 0%, #e0f2fe 30%, #fff7ed 60%, #f0f9f0 100%);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .nature-card {
+    @apply bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,249,240,0.85) 100%);
+    border: 1px solid rgba(52, 125, 52, 0.1);
+  }
+
+  .nature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(52, 125, 52, 0.05) 0%, rgba(166, 134, 88, 0.05) 100%);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .nature-button {
+    @apply bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white font-medium px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden;
+  }
+
+  .nature-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .nature-button:hover::before {
+    left: 100%;
+  }
+
+  .floating-leaf {
+    @apply absolute opacity-30 pointer-events-none;
+    animation: magical-float 6s ease-in-out infinite;
+  }
+
+  .section-title {
+    @apply font-dancing text-3xl md:text-4xl lg:text-5xl font-bold text-forest-700 mb-6 md:mb-8 text-center relative;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .section-title::after {
+    content: '✨';
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-forest-600 via-earth-600 to-forest-600 bg-clip-text text-transparent;
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease-in-out infinite;
+  }
+
+  .skill-tag {
+    @apply bg-gradient-to-r from-forest-100 to-earth-100 text-forest-800 px-3 py-2 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium border border-forest-200 hover:from-forest-200 hover:to-earth-200 transition-all duration-300 transform hover:scale-105 hover:shadow-md;
+  }
+}
+
+/* Enhanced animations */
+@keyframes magical-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-10px) rotate(5deg); 
+    opacity: 0.5;
+  }
+  50% { 
+    transform: translateY(-15px) rotate(-3deg); 
+    opacity: 0.4;
+  }
+  75% { 
+    transform: translateY(-5px) rotate(2deg); 
+    opacity: 0.6;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    transform: translateY(-50%) scale(1); 
+    opacity: 1;
+  }
+  50% { 
+    transform: translateY(-50%) scale(1.2); 
+    opacity: 0.8;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f1f5f9, #e8f5e8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3a9a3a, #a68658);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2d7d2d, #91734c);
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .section-title::after {
+    right: -20px;
+    font-size: 0.8em;
+  }
+}
