@@ -1,8 +1,6 @@
 import { Brain, Target, Heart, Lightbulb, Palette, Dumbbell, Music, BookOpen, PenTool, Plane } from "lucide-react";
 
 const About = () => {
-
-
   const interests = [
     { name: "Sketching", icon: Palette, color: "from-purple-400 to-pink-400" },
     { name: "Fitness", icon: Dumbbell, color: "from-red-400 to-orange-400" },
@@ -10,29 +8,6 @@ const About = () => {
     { name: "Novel Reading", icon: BookOpen, color: "from-green-400 to-teal-400" },
     { name: "Poetry", icon: PenTool, color: "from-yellow-400 to-amber-400" },
     { name: "Travelling", icon: Plane, color: "from-cyan-400 to-blue-400" },
-  ];
-
-  const values = [
-    {
-      title: "Curiosity",
-      description: "Driven by a desire to learn and explore new ideas, technologies, and perspectives.",
-      icon: Lightbulb,
-    },
-    {
-      title: "Empathy",
-      description: "Believing in understanding and connecting with others to build meaningful solutions.",
-      icon: Heart,
-    },
-    {
-      title: "Resilience",
-      description: "Embracing challenges and setbacks as opportunities for growth and improvement.",
-      icon: Brain,
-    },
-    {
-      title: "Focus",
-      description: "Staying committed to goals and delivering results with determination.",
-      icon: Target,
-    },
   ];
 
   return (
@@ -46,7 +21,7 @@ const About = () => {
             <div className="nature-card p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-forest-200/30 to-earth-200/30 rounded-full blur-xl"></div>
               <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6 relative z-10">
-                ✨ Once upon a time, sitting in the grand halls of <span className="font-semibold text-forest-700">🏛️ IIT Kharagpur</span>, watching random Machine Learning videos just for time pass, something magical happened... 🌟 
+                ✨ Once upon a time, sitting in the grand halls of <span className="font-semibold text-forest-700">🏛️ IIT Kharagpur</span>, watching random ML videos just for time pass, something magical happened... 🌟 
               </p>
               
               <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6 relative z-10">
@@ -78,23 +53,6 @@ const About = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Values Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {values.map((value, index) => (
-            <div
-              key={value.title}
-              className="nature-card p-4 md:p-6 text-center group hover:transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-br from-forest-300/20 to-earth-300/20 rounded-full blur-lg"></div>
-              <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-forest-400 to-earth-400 rounded-full mb-4 group-hover:animate-float relative z-10">
-                <value.icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
-              </div>
-              <h3 className="text-base md:text-lg font-semibold text-forest-700 mb-3 relative z-10">{value.title}</h3>
-              <p className="text-gray-600 text-xs md:text-sm leading-relaxed relative z-10">{value.description}</p>
-            </div>
-          ))}
         </div>
       </div>
     </section>

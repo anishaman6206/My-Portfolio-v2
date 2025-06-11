@@ -1,188 +1,483 @@
-
 import { Canvas } from '@react-three/fiber';
 import { Float, Stars } from '@react-three/drei';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const FloatingLeaf = ({ position, color }: { position: [number, number, number], color: string }) => {
+const RealisticLeaf = ({ position, color, isMobile }: { position: [number, number, number], color: string, isMobile?: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime + position[0]) * 0.1;
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.5;
+      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime + position[0]) * 0.3;
+      meshRef.current.rotation.x = Math.cos(state.clock.elapsedTime * 0.7 + position[1]) * 0.2;
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.8;
     }
   });
 
+  const leafSize = isMobile ? 0.25 : 0.4;
+  const stemLength = isMobile ? 0.12 : 0.2;
+  const lighterColor = new THREE.Color(color).lerp(new THREE.Color('#ffffff'), 0.4);
+
   return (
-    <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float speed={1.5} rotationIntensity={1} floatIntensity={0.8}>
       <mesh ref={meshRef} position={position}>
-        <circleGeometry args={[0.3, 6]} />
-        <meshBasicMaterial color={color} transparent opacity={0.6} />
+        {/* Leaf shape using extruded geometry */}
+        <group>
+          {/* Main leaf body */}
+          <mesh>
+            <sphereGeometry args={[leafSize, 8, 6]} />
+            <meshPhongMaterial 
+              color={lighterColor} 
+              transparent 
+              opacity={0.4}
+              shininess={30}
+              specular={new THREE.Color(0x111111)}
+            />
+          </mesh>
+          {/* Leaf stem */}
+          <mesh position={[0, -leafSize * 0.75, 0]} rotation={[0, 0, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, stemLength]} />
+            <meshPhongMaterial 
+              color="#D2B48C" 
+              transparent
+              opacity={0.5}
+            />
+          </mesh>
+          {/* Leaf veins */}
+          <mesh position={[0, 0, 0.01]}>
+            <planeGeometry args={[leafSize * 1.5, leafSize * 2]} />
+            <meshBasicMaterial 
+              color={lighterColor}
+              transparent
+              opacity={0.15}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </group>
       </mesh>
     </Float>
   );
 };
 
-const FloatingIce = ({ position }: { position: [number, number, number] }) => {
+const CrystalIce = ({ position, isMobile }: { position: [number, number, number], isMobile?: boolean }) => {
+  const meshRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.3;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+      meshRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.6 + position[1]) * 0.2;
+    }
+  });
+
+  const crystalSize = isMobile ? 0.2 : 0.3;
+  const spikeHeight = isMobile ? 0.2 : 0.3;
+  const spikeRadius = isMobile ? 0.07 : 0.1;
+
+  return (
+    <Float speed={2} rotationIntensity={1.2} floatIntensity={1}>
+      <group ref={meshRef} position={position}>
+        {/* Main crystal */}
+        <mesh>
+          <octahedronGeometry args={[crystalSize]} />
+          <meshPhysicalMaterial 
+            color="#F0F8FF"
+            transparent
+            opacity={0.3}
+            roughness={0.1}
+            metalness={0.1}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            transmission={0.95}
+            thickness={0.5}
+          />
+        </mesh>
+        {/* Crystal spikes */}
+        <mesh position={[0, crystalSize + spikeHeight/2, 0]}>
+          <coneGeometry args={[spikeRadius, spikeHeight, 6]} />
+          <meshPhysicalMaterial 
+            color="#F0F8FF"
+            transparent
+            opacity={0.4}
+            roughness={0.05}
+            metalness={0.05}
+            clearcoat={1}
+          />
+        </mesh>
+        <mesh position={[0, -(crystalSize + spikeHeight/2), 0]} rotation={[Math.PI, 0, 0]}>
+          <coneGeometry args={[spikeRadius, spikeHeight, 6]} />
+          <meshPhysicalMaterial 
+            color="#F0F8FF"
+            transparent
+            opacity={0.4}
+            roughness={0.05}
+            metalness={0.05}
+            clearcoat={1}
+          />
+        </mesh>
+      </group>
+    </Float>
+  );
+};
+
+const WaterDroplet = ({ position, isMobile }: { position: [number, number, number], isMobile?: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.2;
-      meshRef.current.rotation.y = Math.cos(state.clock.elapsedTime * 0.6 + position[1]) * 0.15;
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.4;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
     }
   });
 
+  const dropletSize = isMobile ? 0.12 : 0.2;
+  const tipHeight = isMobile ? 0.1 : 0.15;
+  const tipRadius = isMobile ? 0.05 : 0.08;
+
   return (
-    <Float speed={2} rotationIntensity={0.8} floatIntensity={0.8}>
+    <Float speed={3} rotationIntensity={0.3} floatIntensity={1.2}>
       <mesh ref={meshRef} position={position}>
-        <octahedronGeometry args={[0.4]} />
-        <meshBasicMaterial color="#B0E0E6" transparent opacity={0.7} />
+        {/* Water droplet shape */}
+        <group>
+          {/* Main droplet body */}
+          <mesh scale={[1, 1.2, 1]}>
+            <sphereGeometry args={[dropletSize, 16, 12]} />
+            <meshPhysicalMaterial 
+              color="#E6F3FF"
+              transparent
+              opacity={0.4}
+              roughness={0}
+              metalness={0}
+              transmission={0.98}
+              thickness={0.5}
+              clearcoat={1}
+              clearcoatRoughness={0}
+            />
+          </mesh>
+          {/* Droplet tip */}
+          <mesh position={[0, dropletSize * 1.25, 0]}>
+            <coneGeometry args={[tipRadius, tipHeight, 8]} />
+            <meshPhysicalMaterial 
+              color="#E6F3FF"
+              transparent
+              opacity={0.4}
+              roughness={0}
+              transmission={0.98}
+              thickness={0.3}
+            />
+          </mesh>
+        </group>
       </mesh>
     </Float>
   );
 };
 
-const FloatingWaterDroplet = ({ position }: { position: [number, number, number] }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+const SnowMountain = ({ position, scale, isMobile }: { position: [number, number, number], scale: number, isMobile?: boolean }) => {
+  const meshRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.3;
+      const breathingScale = 1 + Math.sin(state.clock.elapsedTime * 0.5) * 0.02;
+      const finalScale = isMobile ? scale * 0.7 : scale;
+      meshRef.current.scale.set(finalScale * breathingScale, finalScale * 1.5 * breathingScale, finalScale * breathingScale);
     }
   });
 
   return (
-    <Float speed={3} rotationIntensity={0.2} floatIntensity={1}>
-      <mesh ref={meshRef} position={position}>
+    <group ref={meshRef} position={position}>
+      {/* Mountain base */}
+      <mesh>
+        <coneGeometry args={[2, 5, 8]} />
+        <meshPhongMaterial 
+          color="#A0A0A0"
+          shininess={10}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      {/* Snow cap */}
+      <mesh position={[0, 1.5, 0]}>
+        <coneGeometry args={[1.2, 2, 8]} />
+        <meshPhongMaterial 
+          color="#FFFFFF"
+          shininess={100}
+          specular={new THREE.Color(0x222222)}
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
+      {/* Snow details */}
+      <mesh position={[0.3, 0.8, 0.3]}>
+        <sphereGeometry args={[0.2]} />
+        <meshPhongMaterial 
+          color="#F8F8FF" 
+          shininess={50}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      <mesh position={[-0.2, 1.2, 0.2]}>
         <sphereGeometry args={[0.15]} />
-        <meshBasicMaterial color="#87CEEB" transparent opacity={0.8} />
-      </mesh>
-    </Float>
-  );
-};
-
-const Mountain = ({ position, scale }: { position: [number, number, number], scale: number }) => {
-  return (
-    <mesh position={position} scale={[scale, scale * 1.5, scale]}>
-      <coneGeometry args={[2, 4, 6]} />
-      <meshBasicMaterial color="#654321" transparent opacity={0.3} />
-    </mesh>
-  );
-};
-
-const Tree = ({ position }: { position: [number, number, number] }) => {
-  return (
-    <group position={position}>
-      {/* Tree trunk */}
-      <mesh position={[0, -1, 0]}>
-        <cylinderGeometry args={[0.1, 0.2, 2]} />
-        <meshBasicMaterial color="#8B4513" transparent opacity={0.4} />
-      </mesh>
-      {/* Tree leaves */}
-      <mesh position={[0, 0.5, 0]}>
-        <sphereGeometry args={[1]} />
-        <meshBasicMaterial color="#228B22" transparent opacity={0.5} />
+        <meshPhongMaterial 
+          color="#F8F8FF" 
+          shininess={50}
+          transparent
+          opacity={0.4}
+        />
       </mesh>
     </group>
   );
 };
 
-const River = () => {
+const MagicalTree = ({ position, isMobile }: { position: [number, number, number], isMobile?: boolean }) => {
+  const treeRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (treeRef.current) {
+      treeRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
+    }
+  });
+
+  const trunkHeight = isMobile ? 1.8 : 2.5;
+  const trunkRadius = isMobile ? 0.1 : 0.15;
+  const foliageSize = isMobile ? 0.8 : 1.2;
+  const smallFoliageSize = isMobile ? 0.5 : 0.8;
+
+  return (
+    <group ref={treeRef} position={position}>
+      {/* Tree trunk with texture */}
+      <mesh position={[0, -1, 0]}>
+        <cylinderGeometry args={[trunkRadius, trunkRadius + 0.1, trunkHeight, 8]} />
+        <meshPhongMaterial 
+          color="#D2B48C"
+          shininess={5}
+          bumpScale={0.1}
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
+      {/* Main foliage */}
+      <mesh position={[0, 0.8, 0]}>
+        <sphereGeometry args={[foliageSize, 12, 8]} />
+        <meshPhongMaterial 
+          color="#90EE90"
+          shininess={20}
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      {/* Additional foliage layers */}
+      <mesh position={[0, 0.3, 0]}>
+        <sphereGeometry args={[smallFoliageSize, 10, 6]} />
+        <meshPhongMaterial 
+          color="#98FB98"
+          transparent
+          opacity={0.3}
+        />
+      </mesh>
+      {/* Small branches */}
+      <mesh position={[foliageSize * 0.67, 0.5, 0]} rotation={[0, 0, Math.PI/6]}>
+        <cylinderGeometry args={[0.02, 0.03, 0.4]} />
+        <meshPhongMaterial 
+          color="#D2B48C"
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+      <mesh position={[-foliageSize * 0.58, 0.3, 0.3]} rotation={[0, 0, -Math.PI/8]}>
+        <cylinderGeometry args={[0.02, 0.03, 0.35]} />
+        <meshPhongMaterial 
+          color="#D2B48C"
+          transparent
+          opacity={0.4}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+const RealisticRiver = () => {
   const riverRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (riverRef.current && riverRef.current.material instanceof THREE.MeshBasicMaterial) {
-      riverRef.current.material.opacity = 0.3 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+    if (riverRef.current) {
+      // Water surface animation
+      if (riverRef.current.material instanceof THREE.MeshPhysicalMaterial) {
+        riverRef.current.material.normalScale?.set(
+          0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.2,
+          0.5 + Math.cos(state.clock.elapsedTime * 1.5) * 0.2
+        );
+        riverRef.current.material.opacity = 0.4 + Math.sin(state.clock.elapsedTime * 1.5) * 0.1;
+      }
     }
   });
 
   return (
-    <mesh ref={riverRef} position={[0, -8, -2]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[30, 3]} />
-      <meshBasicMaterial color="#4682B4" transparent opacity={0.3} />
-    </mesh>
+    <group>
+      {/* Main river surface */}
+      <mesh ref={riverRef} position={[0, -10, -7]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[35, 4]} />
+        <meshPhysicalMaterial 
+          color="#87CEEB"
+          transparent
+          opacity={0.4}
+          roughness={0.1}
+          metalness={0.1}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          transmission={0.8}
+          thickness={0.5}
+          normalScale={new THREE.Vector2(0.5, 0.5)}
+        />
+      </mesh>
+      {/* River bed details */}
+      <mesh position={[0, -10, -4]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[35, 4]} />
+        <meshPhongMaterial 
+          color="#8B7355"
+          transparent
+          opacity={0.3}
+        />
+      </mesh>
+     
+      
+      {/* Water ripples */}
+      <mesh position={[-8, -8.4, -3]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.8, 16]} />
+        <meshBasicMaterial 
+          color="#B0E0E6"
+          transparent
+          opacity={0.2}
+        />
+      </mesh>
+      <mesh position={[12, -8.4, -4.5]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[1.2, 16]} />
+        <meshBasicMaterial 
+          color="#B0E0E6"
+          transparent
+          opacity={0.15}
+        />
+      </mesh>
+    </group>
   );
 };
-
-const Fireflies = () => {
-  const pointsRef = useRef<THREE.Points>(null);
+const EnhancedFireflies = ({ isMobile }: { isMobile?: boolean }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const particleCount = isMobile ? 30 : 60;
   
   useFrame((state) => {
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+      
+      // Animate individual fireflies
+      groupRef.current.children.forEach((child, i) => {
+        if (child instanceof THREE.Mesh) {
+          child.position.y += Math.sin(state.clock.elapsedTime * 2 + i) * 0.001;
+          child.position.x += Math.cos(state.clock.elapsedTime * 1.5 + i) * 0.001;
+          
+          // Pulsing glow effect
+          if (child.material instanceof THREE.MeshBasicMaterial) {
+            const intensity = 0.4 + Math.sin(state.clock.elapsedTime * 3 + i) * 0.2;
+            child.material.opacity = Math.max(0.2, intensity);
+          }
+        }
+      });
     }
   });
 
-  const particles = new Float32Array(150 * 3);
-  for (let i = 0; i < 150; i++) {
-    particles[i * 3] = (Math.random() - 0.5) * 30;
-    particles[i * 3 + 1] = (Math.random() - 0.5) * 20;
-    particles[i * 3 + 2] = (Math.random() - 0.5) * 30;
+  const fireflySize = isMobile ? 0.05 : 0.08;
+  const glowSize = isMobile ? 0.1 : 0.15;
+
+  const fireflies = [];
+  for (let i = 0; i < particleCount; i++) {
+    const position: [number, number, number] = [
+      (Math.random() - 0.5) * (isMobile ? 20 : 30),
+      (Math.random() - 0.5) * (isMobile ? 15 : 20),
+      (Math.random() - 0.5) * (isMobile ? 20 : 30)
+    ];
+    
+    fireflies.push(
+      <mesh key={i} position={position}>
+        <sphereGeometry args={[fireflySize, 8, 6]} />
+        <meshBasicMaterial 
+          color="#FFFACD" 
+          transparent
+          opacity={0.4}
+        />
+        {/* Glow effect */}
+        <mesh>
+          <sphereGeometry args={[glowSize, 8, 6]} />
+          <meshBasicMaterial 
+            color="#FFFACD" 
+            transparent
+            opacity={0.1}
+          />
+        </mesh>
+      </mesh>
+    );
   }
 
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={150}
-          array={particles}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.15} color="#FFD700" transparent opacity={0.8} />
-    </points>
-  );
+  return <group ref={groupRef}>{fireflies}</group>;
 };
 
 const MagicalBackground = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div className="fixed inset-0 -z-10">
       <Canvas camera={{ position: [0, 2, 12] }}>
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[10, 10, 5]} intensity={0.3} />
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[10, 10, 5]} intensity={0.4} color="#FFF8DC" />
+        <pointLight position={[-10, -10, -5]} intensity={0.2} color="#87CEEB" />
         
-        {/* Stars and magical atmosphere */}
-        <Stars radius={100} depth={50} count={8000} factor={4} saturation={0} fade speed={1} />
+        {/* Enhanced stars */}
+        <Stars 
+          radius={100} 
+          depth={50} 
+          count={isMobile ? 4000 : 8000} 
+          factor={6} 
+          saturation={0} 
+          fade 
+          speed={1} 
+        />
         
-        {/* Mountains positioned on the ground plane - left and right */}
-        <Mountain position={[-15, -6, -8]} scale={1.5} />
-        <Mountain position={[15, -6, -8]} scale={1.5} />
+        {/* Snow-capped mountains - only show on desktop */}
+        {!isMobile && <SnowMountain position={[-15, -6, -8]} scale={1.5} isMobile={isMobile} />}
+        {!isMobile && <SnowMountain position={[15, -6, -8]} scale={1.5} isMobile={isMobile} />}
         
-        {/* Trees positioned on the ground plane - left and right */}
-        <Tree position={[-8, -6, -2]} />
-        <Tree position={[8, -6, -2]} />
+        {/* Magical trees - only show on desktop */}
+        {!isMobile && <MagicalTree position={[-8, -6, -2]} isMobile={isMobile} />}
+        {!isMobile && <MagicalTree position={[8, -6, -2]} isMobile={isMobile} />}
         
-        {/* Magical river */}
-        <River />
+        {/* Realistic river flowing through the landscape - only show on desktop */}
+        {!isMobile && <RealisticRiver />}
         
         {/* Enhanced fireflies */}
-        <Fireflies />
+        <EnhancedFireflies isMobile={isMobile} />
         
-        {/* Floating magical leaves */}
-        <FloatingLeaf position={[-8, 2, 2]} color="#228B22" />
-        <FloatingLeaf position={[8, -1, 1]} color="#32CD32" />
-        <FloatingLeaf position={[-5, -3, 3]} color="#90EE90" />
-        <FloatingLeaf position={[6, 3, -1]} color="#98FB98" />
-        <FloatingLeaf position={[0, 4, 2]} color="#ADFF2F" />
-        <FloatingLeaf position={[-12, -2, 0]} color="#9ACD32" />
+        {/* Realistic floating leaves - significantly reduced */}
+        <RealisticLeaf position={[-6, 1, 2]} color="#228B22" isMobile={isMobile} />
+        <RealisticLeaf position={[6, -1, 1]} color="#32CD32" isMobile={isMobile} />
+        {!isMobile && <RealisticLeaf position={[0, 3, 2]} color="#90EE90" isMobile={isMobile} />}
         
-        {/* Floating ice crystals */}
-        <FloatingIce position={[-6, 1, 3]} />
-        <FloatingIce position={[4, -2, 1]} />
-        <FloatingIce position={[-3, 5, -1]} />
-        <FloatingIce position={[9, 2, 4]} />
+        {/* Crystal ice formations - significantly reduced */}
+        <CrystalIce position={[-4, 2, 3]} isMobile={isMobile} />
+        {!isMobile && <CrystalIce position={[5, -1, 1]} isMobile={isMobile} />}
         
-        {/* Floating water droplets */}
-        <FloatingWaterDroplet position={[-4, 3, 2]} />
-        <FloatingWaterDroplet position={[7, 0, 3]} />
-        <FloatingWaterDroplet position={[-9, -1, 1]} />
-        <FloatingWaterDroplet position={[3, 4, -2]} />
-        <FloatingWaterDroplet position={[-1, 2, 4]} />
-        <FloatingWaterDroplet position={[11, 1, 0]} />
+        {/* Realistic water droplets - significantly reduced */}
+        <WaterDroplet position={[-2, 4, 2]} isMobile={isMobile} />
+        {!isMobile && <WaterDroplet position={[4, 1, 3]} isMobile={isMobile} />}
       </Canvas>
     </div>
   );
