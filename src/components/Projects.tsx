@@ -5,6 +5,14 @@ import { ExternalLink, Github, Eye } from "lucide-react";
 const Projects = () => {
   const projects = [
     {
+      title: "KrishiMitra AI — The Farmer's Copilot",
+      description: "An advanced, multimodal AI copilot designed for Indian farmers and the agricultural ecosystem. It provides hyperlocal, data-driven advice through a simple Telegram bot that understands queries in over 20 Indian languages via text, voice, and even images.",
+      technologies: ["Python",  "FastApi", "Sarvam AI","Telegram API", "RAG"],
+      github: "https://github.com/anishaman6206/krishimitra",
+      live: "#",
+      category: "AI/ML"
+    },
+    {
       title: "AI-Enhanced Fashion Recommender and Outfit Matcher",
       description: "Developed a personalized fashion recommendation app with TF-IDF-based filtering and LLM suggestions for complementary outfits. Fine-tuned ResNet50 for image-based recommendations, optimized with FAISS for fast retrieval.",
       technologies: ["Python", "ResNet50", "TF-IDF", "LLM", "FAISS", "Computer Vision"],
